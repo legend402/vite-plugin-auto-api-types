@@ -1,5 +1,9 @@
 # vite-plugin-auto-api-types
 
+<div align="right">
+  <a href="./README.md">中文</a> | <a href="./README_EN.md">English</a>
+</div>
+
 一个自动拦截前端请求、解析响应数据结构并生成 TypeScript 全局类型声明的 Vite 插件。无需手动编写 API 接口类型，开发过程中自动生成，大幅提升前端开发效率。
 
 ## 🌟 核心特性
