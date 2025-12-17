@@ -1,4 +1,4 @@
-// 自动生成的API类型声明 - 2025/12/16 14:37:12
+// 自动生成的API类型声明 - 2025/12/17 09:18:35
 
 /* eslint-disable */
 
@@ -35,14 +35,6 @@ type Api_users = {
     bs: string;
   };
 }[];
-
-
-type Api_posts_1 = {
-  userId: number;
-  id: number;
-  title: string;
-  body: string;
-};
 
 
 }
