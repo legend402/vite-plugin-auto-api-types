@@ -5,17 +5,13 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 项目版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
-## [1.0.5] - 2025-12-17
-
-### 新增
-- 添加 CHANGELOG.md 文件以跟踪版本变更
-- 更新 package.json 中的 test 脚本，使用 npx tsx 运行测试文件
-
-## [1.0.6] - 2025-12-17
+## [1.1.0] - 2025-12-17
 ### Added
-- 实现模块化类型文件生成功能
-- 在AutoApiTypesPluginOptions中添加moduleMap配置项
-- 支持根据URL前缀将API类型分组到不同的模块文件中
+- 实现局部类型生成功能
+- 在AutoApiTypesPluginOptions中添加responsePath配置项
+- 支持从API响应中提取特定部分生成类型定义
+- 添加extractValueByPath工具函数
+- 编写局部类型生成测试用例
 
 ## [1.0.8] - 2025-12-17
 ### Added
@@ -29,6 +25,18 @@
 - 支持将模块化类型文件单独放到指定的子目录中
 - 新增moduleDir配置项，用于指定模块化类型文件存放的文件夹名称
 - 保持默认类型文件在原目录，只将模块化文件移动到子目录
+
+## [1.0.6] - 2025-12-17
+### Added
+- 实现模块化类型文件生成功能
+- 在AutoApiTypesPluginOptions中添加moduleMap配置项
+- 支持根据URL前缀将API类型分组到不同的模块文件中
+
+## [1.0.5] - 2025-12-17
+
+### 新增
+- 添加 CHANGELOG.md 文件以跟踪版本变更
+- 更新 package.json 中的 test 脚本，使用 npx tsx 运行测试文件
 
 ## [1.0.4] - 2025-12-17
 

@@ -47,6 +47,7 @@ export default defineConfig({
       excludeUrls: [/^\/assets/, /\.(svg|png|jpg)$/], // 排除不需要拦截的URL
       typeFileName: 'auto-api-types.d.ts', // 生成的类型文件名，默认：api-types.d.ts
       debounceDelay: 1000, // 防抖延迟（ms），默认：1000
+      responsePath: 'result.records', // 指定从API响应中提取类型的路径，仅生成该部分的类型定义
       moduleMap: {
         // 模块化类型配置，将特定URL的类型生成到独立文件
         '/api/user': 'user',       // /api/user开头的请求类型生成到user.d.ts
@@ -123,6 +124,7 @@ async function getUserList() {
 | `moduleDir` | `string` | `undefined` | 模块化类型文件存放的子目录名称，设置后模块化类型文件将生成到 `${outputDir}/${moduleDir}` 目录下 |
 | `typeNameGenerator` | `(url: string) => string` | 默认规则 | 自定义类型命名规则函数，根据URL生成类型名称 |
 | `cacheSize` | `number` | `100` | LRU缓存大小，限制API类型记录的最大数量，避免内存占用过大 |
+| `responsePath` | `string` | `undefined` | 指定从API响应中提取类型的路径（如'result.records'），仅生成指定路径部分的类型定义 |
 
 ## 🎨 类型生成规则
 1. **类型命名**：基于请求 URL 生成，默认规则如下：

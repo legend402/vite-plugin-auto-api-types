@@ -4,7 +4,7 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import { getClientScript } from './client';
-import { generateSafeTypeName, debounce, TypeWorkerManager, LRUCache } from './utils';
+import { generateSafeTypeName, debounce, TypeWorkerManager, LRUCache, extractValueByPath } from './utils';
 import type { AutoApiTypesPluginOptions } from './types';
 
 // 插件主函数
@@ -18,7 +18,8 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
         moduleMap = {},
         moduleDir = '',
         typeNameGenerator = generateSafeTypeName,
-        cacheSize = 100
+        cacheSize = 100,
+        responsePath = ''
     } = options;
 
     // 存储API类型记录（使用LRU缓存优化内存使用）
@@ -32,9 +33,12 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
         
         // 生成唯一的类型名称（优先使用用户自定义的规则）
         const typeName = typeNameGenerator(url);
+        
+        // 根据路径提取数据
+        const extractedData = extractValueByPath(data, responsePath);
 
         // 使用Worker异步生成类型字符串
-        const typeStr = await typeWorker.generateType(typeName, data);
+        const typeStr = await typeWorker.generateType(typeName, extractedData);
 
         if (typeStr) {
             // 防抖：1秒内不重复更新

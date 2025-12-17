@@ -47,6 +47,7 @@ export default defineConfig({
       excludeUrls: [/^\/assets/, /\.(svg|png|jpg)$/], // Exclude URLs that do not need to be intercepted
       typeFileName: 'auto-api-types.d.ts', // Generated type file name, default: api-types.d.ts
       debounceDelay: 1000, // Debounce delay (ms), default: 1000
+      responsePath: 'result.records', // Specify the path to extract types from API responses, generate types only for this part
       moduleMap: {
         // Modular type configuration, generate types for specific URLs into independent files
         '/api/user': 'user',       // Generate types for requests starting with /api/user into user.d.ts
@@ -123,6 +124,7 @@ async function getUserList() {
 | `moduleDir` | `string` | `undefined` | Subdirectory name for storing modular type files, after setting, modular type files will be generated to `${outputDir}/${moduleDir}` directory |
 | `typeNameGenerator` | `(url: string) => string` | Default rule | Custom type naming rule function, generates type name based on URL |
 | `cacheSize` | `number` | `100` | LRU cache size, limits the maximum number of API type records to avoid excessive memory usage |
+| `responsePath` | `string` | `undefined` | Specifies the path to extract types from API responses (e.g., 'result.records'), generates type definitions only for the specified path |
 
 ## 🎨 Type Generation Rules
 1. **Type Naming**: Generated based on the request URL, with the default rules:

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import { getUsers } from './api/userApi'
+import { getSysConfig, getUsers } from './api/userApi'
 import { getProducts, searchProducts } from './api/productApi'
 
 function App() {
@@ -60,6 +60,7 @@ function App() {
   useEffect(() => {
     fetchUsers();
     fetchProducts();
+    getSysConfig();
   }, []);
 
   return (

@@ -16,9 +16,9 @@ export default defineConfig({
         '/users': 'users',
       },
       moduleDir: 'autoApi',
+      responsePath: 'result',
       typeNameGenerator: (url: string) => {
         const path = url.split('/').filter(Boolean);
-        
         return path.map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('_');
       }
     })

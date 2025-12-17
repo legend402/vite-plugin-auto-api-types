@@ -49,6 +49,11 @@ export interface AutoApiTypesPluginOptions {
      * @default 100
      */
     cacheSize?: number;
+    /**
+     * 从API响应中提取类型的路径
+     * 格式：'result.records' 表示从response.result.records提取类型
+     */
+    responsePath?: string;
 }
 
 // 导出类型

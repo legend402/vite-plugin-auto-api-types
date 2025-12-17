@@ -1,6 +1,30 @@
 // 工具函数
 
 /**
+ * 根据路径从对象中提取值
+ * @param obj 要提取值的对象
+ * @param path 提取路径，如 'result.records'
+ * @returns 提取的值，如果路径不存在则返回原对象
+ */
+export const extractValueByPath = (obj: any, path: string): any => {
+    if (!path || typeof obj !== 'object' || obj === null) return obj;
+    
+    const keys = path.split('.');
+    let result = obj;
+    
+    for (const key of keys) {
+        if (result && typeof result === 'object' && key in result) {
+            result = result[key];
+        } else {
+            // 如果路径不存在，返回原对象
+            return obj;
+        }
+    }
+    
+    return result;
+};
+
+/**
  * 生成安全的类型名称
  * @param url API请求URL
  * @returns 安全的类型名称
