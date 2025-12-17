@@ -41,7 +41,7 @@ export default defineConfig({
       outputDir: 'src/types',          // Type file output directory, default: types
       excludeUrls: [/^\/assets/, /\.(svg|png|jpg)$/], // Exclude URLs that do not need to be intercepted
       typeFileName: 'auto-api-types.d.ts', // Generated type file name, default: api-types.d.ts
-      debounceDelay: 500 // Debounce delay (ms), default: 500
+      debounceDelay: 1000 // Debounce delay (ms), default: 1000
     })
   ]
 });
@@ -97,13 +97,13 @@ async function getUserList() {
 | `outputDir` | `string` | `types` | Type file output directory (relative to the project root directory) |
 | `excludeUrls` | `RegExp[]` | `[]` | Regular expression list of URLs to exclude (e.g., static resources, images, etc.) |
 | `typeFileName` | `string` | `api-types.d.ts` | Generated type declaration file name |
-| `debounceDelay` | `number` | `500` | Debounce delay (ms), to avoid frequent file writing caused by multiple requests in a short time |
+| `debounceDelay` | `number` | `1000` | Debounce delay (ms), to avoid frequent file writing caused by multiple requests in a short time |
 
 ## 🎨 Type Generation Rules
 1. **Type Naming**: Generated based on the request URL, with the following rules:
     - Remove the domain part: `https://api.example.com/user` → `user`
-    - Replace special characters with underscores: `/api/user/list?page=1` → `api_user_list_page_1`
-    - Final generation: `Api_${processed URL}` → `Api_api_user_list_page_1`
+    - Replace special characters with underscores: `/api/user/list?page=1` → `api_user_list`
+    - Final generation: `Api_${processed URL}` → `Api_api_user_list`
 2. **Basic Type Mapping**:
    | JavaScript Type | TypeScript Type |
    |------------------|------------------|
@@ -161,7 +161,7 @@ MIT License
 
 ## 📞 Feedback and Contributions
 - If you have any questions or suggestions, please feel free to submit an Issue or PR
-- Plugin source code address: [GitHub repository address] (can be replaced with the actual repository address)
+- Plugin source code address: [GitHub repository address](https://github.com/legend402/vite-plugin-auto-api-types)
 
 ## ✨ Best Practices
 1. Only use this plugin in the development environment (no need to automatically generate types in the production environment)
