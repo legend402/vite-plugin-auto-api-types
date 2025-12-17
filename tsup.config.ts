@@ -6,5 +6,10 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
-  target: 'es2020'
+  target: 'es2020',
+  outExtension: (ctx) => {
+    return {
+      js: ctx.format === 'cjs' ? '.cjs' : '.js'
+    }
+  }
 })
