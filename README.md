@@ -12,7 +12,12 @@
 - 🌍 **全局类型声明**：生成 `.d.ts` 全局类型文件，无需手动导入即可使用类型提示
 - ⚡ **无感知开发**：类型更新不触发页面刷新，不打断开发流程
 - 🎯 **灵活配置**：支持排除指定 URL、自定义输出目录/文件名、防抖延迟等
-- 🛡️ **稳定可靠**：完善的错误处理，拦截逻辑不影响原请求执行
+- 📦 **模块化类型**：支持将不同模块的 API 类型生成到独立文件中
+- 📂 **子目录支持**：可将模块化类型文件集中存放于指定子目录
+- 🎨 **自定义命名**：支持用户自定义类型命名规则，生成符合项目规范的类型名
+- 🧠 **LRU缓存优化**：内置LRU缓存机制，自动限制内存占用，避免内存泄漏
+- 🗑️ **手动清理API**：提供clearCache()插件方法，支持手动清理缓存，灵活控制内存使用
+- ️ **稳定可靠**：完善的错误处理，拦截逻辑不影响原请求执行
 
 ## 📦 安装
 
@@ -41,7 +46,23 @@ export default defineConfig({
       outputDir: 'src/types',          // 类型文件输出目录，默认：types
       excludeUrls: [/^\/assets/, /\.(svg|png|jpg)$/], // 排除不需要拦截的URL
       typeFileName: 'auto-api-types.d.ts', // 生成的类型文件名，默认：api-types.d.ts
-      debounceDelay: 1000 // 防抖延迟（ms），默认：1000
+      debounceDelay: 1000, // 防抖延迟（ms），默认：1000
+      moduleMap: {
+        // 模块化类型配置，将特定URL的类型生成到独立文件
+        '/api/user': 'user',       // /api/user开头的请求类型生成到user.d.ts
+        '/api/product': 'product', // /api/product开头的请求类型生成到product.d.ts
+        '/api/order': 'order'      // /api/order开头的请求类型生成到order.d.ts
+      },
+      moduleDir: 'modules', // 模块化类型文件存放的子目录，默认：不创建子目录
+      typeNameGenerator: (url) => {
+        // 自定义类型命名规则
+        const path = url.replace(/^https?:\/\/[^\/]+/, '')
+          .replace(/^\/api\//, '') // 移除/api前缀
+          .replace(/[^a-zA-Z0-9]/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_|_$/g, '');
+        return path ? `Api_${path}` : 'Api_Unknown';
+      }
     })
   ]
 });
@@ -96,11 +117,15 @@ async function getUserList() {
 |--------|------|--------|------|
 | `outputDir` | `string` | `types` | 类型文件输出目录（相对于项目根目录） |
 | `excludeUrls` | `RegExp[]` | `[]` | 排除拦截的 URL 正则列表（如静态资源、图片等） |
-| `typeFileName` | `string` | `api-types.d.ts` | 生成的类型声明文件名 |
+| `typeFileName` | `string` | `api-types.d.ts` | 生成的类型声明文件名（默认类型文件） |
 | `debounceDelay` | `number` | `1000` | 防抖延迟（ms），避免短时间内多次请求导致频繁写入文件 |
+| `moduleMap` | `Record<string, string>` | `{}` | URL前缀映射表，将匹配前缀的请求类型生成到指定文件名（无需扩展名） |
+| `moduleDir` | `string` | `undefined` | 模块化类型文件存放的子目录名称，设置后模块化类型文件将生成到 `${outputDir}/${moduleDir}` 目录下 |
+| `typeNameGenerator` | `(url: string) => string` | 默认规则 | 自定义类型命名规则函数，根据URL生成类型名称 |
+| `cacheSize` | `number` | `100` | LRU缓存大小，限制API类型记录的最大数量，避免内存占用过大 |
 
 ## 🎨 类型生成规则
-1. **类型命名**：基于请求 URL 生成，规则如下：
+1. **类型命名**：基于请求 URL 生成，默认规则如下：
     - 移除域名部分：`https://api.example.com/user` → `user`
     - 特殊字符替换为下划线：`/api/user/list?page=1` → `api_user_list`
     - 最终生成：`Api_${处理后的URL}` → `Api_api_user_list`
@@ -115,6 +140,15 @@ async function getUserList() {
    | object | 递归生成接口类型 |
    | array | 生成数组类型（如 `Type[]`） |
 3. **复杂类型**：自动递归解析嵌套对象/数组结构，生成完整的类型声明。
+4. **模块化类型生成**：
+   - 未匹配 `moduleMap` 的请求类型生成到默认文件（如 `api-types.d.ts`）
+   - 匹配 `moduleMap` 的请求类型生成到指定文件（如 `user.d.ts`）
+   - 设置 `moduleDir` 后，模块化类型文件将生成到指定子目录中
+   - 相同模块的类型会合并到同一个文件中
+5. **自定义类型命名**：
+   - 通过 `typeNameGenerator` 配置项可自定义类型命名规则
+   - 该函数接收 URL 参数，返回生成的类型名称
+   - 支持完全自定义类型命名，满足不同项目的命名规范要求
 
 ## 🚫 排除URL示例
 ```typescript

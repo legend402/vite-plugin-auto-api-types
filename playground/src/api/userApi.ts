@@ -1,7 +1,7 @@
 // 用户API服务
 
 // 获取用户列表
-export const getUsers = async (): Promise<Api_users> => {
+export const getUsers = async (): Promise<Users> => {
   const response = await fetch('https://jsonplaceholder.typicode.com/users');
   return response.json();
 };

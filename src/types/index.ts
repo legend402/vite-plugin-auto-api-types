@@ -38,6 +38,17 @@ export interface AutoApiTypesPluginOptions {
      * 如果设置，模块化类型文件会生成到 ${outputDir}/${moduleDir} 目录下
      */
     moduleDir?: string;
+    /**
+     * 自定义类型命名规则
+     * @param url API请求URL
+     * @returns 生成的类型名称
+     */
+    typeNameGenerator?: (url: string) => string;
+    /**
+     * API类型缓存的最大容量
+     * @default 100
+     */
+    cacheSize?: number;
 }
 
 // 导出类型

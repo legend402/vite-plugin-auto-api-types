@@ -49,3 +49,15 @@ export const debounce = <T extends (...args: any[]) => any>(
         timeout = setTimeout(later, wait);
     };
 };
+
+// 导出类型文件写入器
+import { TypeFileWriter } from './TypeFileWriter';
+export { TypeFileWriter };
+
+// 导出类型工作线程管理器
+import { TypeWorkerManager } from './TypeWorker';
+export { TypeWorkerManager };
+
+// 导出LRU缓存
+import { LRUCache } from './LRUCache';
+export { LRUCache };

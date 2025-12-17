@@ -17,6 +17,13 @@
 - 在AutoApiTypesPluginOptions中添加moduleMap配置项
 - 支持根据URL前缀将API类型分组到不同的模块文件中
 
+## [1.0.8] - 2025-12-17
+### Added
+- 实现LRU缓存机制，优化内存使用
+- 添加cacheSize配置项，可自定义LRU缓存大小
+- 新增clearCache()插件API方法，支持手动清理缓存
+- 编写LRU缓存测试用例，确保功能正常工作
+
 ## [1.0.7] - 2025-12-17
 ### Added
 - 支持将模块化类型文件单独放到指定的子目录中

@@ -1,5 +1,5 @@
 // 测试类型生成功能
-import { TypeGenerator } from './src/index';
+import { TypeGenerator } from '../src/index';
 
 // 用户提供的数据结构示例
 const userData = {

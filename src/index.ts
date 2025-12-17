@@ -3,10 +3,9 @@ import type { Plugin, IndexHtmlTransformHook } from 'vite';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
-import { TypeGenerator } from './generators/TypeGenerator';
 import { getClientScript } from './client';
-import { generateSafeTypeName, debounce } from './utils';
-import type { AutoApiTypesPluginOptions, ApiTypeRecord } from './types';
+import { generateSafeTypeName, debounce, TypeWorkerManager, LRUCache } from './utils';
+import type { AutoApiTypesPluginOptions } from './types';
 
 // 插件主函数
 export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = {}): Plugin {
@@ -17,105 +16,48 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
         typeFileName = 'api-types.d.ts',
         debounceDelay = 1000,
         moduleMap = {},
-        moduleDir = ''
+        moduleDir = '',
+        typeNameGenerator = generateSafeTypeName,
+        cacheSize = 100
     } = options;
 
-    // 存储API类型记录
-    const apiTypes: ApiTypeRecord = {};
+    // 存储API类型记录（使用LRU缓存优化内存使用）
+    const apiTypes = new LRUCache(cacheSize);
     let outputPath = '';
-
-    // 工具函数：根据URL获取对应的模块名称
-    const getModuleName = (url: string): string => {
-        // 遍历moduleMap，找到匹配的URL前缀
-        for (const [pathPattern, moduleName] of Object.entries(moduleMap)) {
-            if (url.startsWith(pathPattern)) {
-                return moduleName;
-            }
-        }
-        // 默认返回主文件
-        return typeFileName.replace('.d.ts', '');
-    };
+    let typeWorker: TypeWorkerManager | null = null;
 
     // 工具函数：更新API类型
-    const updateApiType = debounce((url: string, data: any) => {
-        // 生成唯一的类型名称
-        const typeName = generateSafeTypeName(url);
+    const updateApiType = debounce(async (url: string, data: any) => {
+        if (!typeWorker) return;
+        
+        // 生成唯一的类型名称（优先使用用户自定义的规则）
+        const typeName = typeNameGenerator(url);
 
-        // 生成类型字符串
-        const typeStr = TypeGenerator.generateType(typeName, data);
+        // 使用Worker异步生成类型字符串
+        const typeStr = await typeWorker.generateType(typeName, data);
 
-        // 防抖：1秒内不重复更新
-        const now = Date.now();
+        if (typeStr) {
+            // 防抖：1秒内不重复更新
+            const now = Date.now();
 
-        // 更新类型记录
-        apiTypes[url] = {
-            type: typeStr,
-            lastUpdate: now
-        };
+            // 更新类型记录
+            apiTypes.set(url, {
+                type: typeStr,
+                lastUpdate: now
+            });
 
-        // 写入类型文件
-        writeTypesFile();
+            // 使用Worker异步写入类型文件
+            await typeWorker.writeTypesFile(apiTypes.toObject(), {
+                outputDir,
+                typeFileName,
+                moduleDir,
+                moduleMap
+            });
+        }
     }, debounceDelay);
 
-    // 工具函数：写入类型文件
-    const writeTypesFile = () => {
-        try {
-            // 按模块分组类型
-            const moduleTypes: Record<string, string[]> = {};
-            
-            // 遍历所有API类型
-            for (const [url, { type }] of Object.entries(apiTypes)) {
-                const moduleName = getModuleName(url);
-                if (!moduleTypes[moduleName]) {
-                    moduleTypes[moduleName] = [];
-                }
-                moduleTypes[moduleName].push(type);
-            }
-            
-            // 为每个模块生成类型文件
-            for (const [moduleName, typeEntries] of Object.entries(moduleTypes)) {
-                // 确定文件名
-                const fileName = moduleName === typeFileName.replace('.d.ts', '') ? 
-                    typeFileName : `${moduleName}.d.ts`;
-                
-                // 确定输出路径
-                let filePath;
-                if (moduleName === typeFileName.replace('.d.ts', '')) {
-                    // 默认文件直接放在outputDir中
-                    filePath = path.resolve(outputDir, fileName);
-                } else {
-                    // 模块化文件根据moduleDir配置决定路径
-                    if (moduleDir) {
-                        // 如果设置了moduleDir，则放在子目录中
-                        const moduleDirPath = path.resolve(outputDir, moduleDir);
-                        // 确保模块目录存在
-                        fs.mkdirSync(moduleDirPath, { recursive: true, mode: 0o755 });
-                        filePath = path.resolve(moduleDirPath, fileName);
-                    } else {
-                        // 否则和默认文件放在同一目录
-                        filePath = path.resolve(outputDir, fileName);
-                    }
-                }
-                
-                // 生成文件内容
-                const content = [
-                    `// 自动生成的API类型声明 - ${new Date().toLocaleString()}`,
-                    `/* eslint-disable */`,
-                    `declare global {`,
-                    ...typeEntries.map(t => t.replace(/export /g, '')), // 转为全局类型
-                    `}`,
-                    `export {};`
-                ].join('\n\n');
-                
-                // 写入文件
-                fs.writeFileSync(filePath, content, 'utf-8');
-            }
-        } catch (err) {
-            console.error('写入API类型文件失败:', err);
-        }
-    };
-
-    return {
+    // 定义插件对象
+    const plugin: Plugin = {
         name: 'vite-plugin-auto-api-types',
         enforce: 'post',
 
@@ -129,6 +71,11 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
             
             // 设置主输出路径
             outputPath = path.resolve(outputDirPath, typeFileName);
+
+            // 创建类型工作线程管理器（延迟初始化）
+            if (!typeWorker) {
+                typeWorker = new TypeWorkerManager();
+            }
 
             // 初始化类型文件（不存在时创建）
             fsPromises.access(outputPath).catch(async () => {
@@ -180,12 +127,33 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
         } as unknown as IndexHtmlTransformHook,
 
         // 构建结束时生成最终类型文件
-        buildEnd() {
-            if (Object.keys(apiTypes).length > 0) {
-                writeTypesFile();
+        async buildEnd() {
+            const typesObj = apiTypes.toObject();
+            if (Object.keys(typesObj).length > 0 && typeWorker) {
+                await typeWorker.writeTypesFile(typesObj, {
+                    outputDir,
+                    typeFileName,
+                    moduleDir,
+                    moduleMap
+                });
+            }
+        },
+
+        // 插件卸载时清理资源
+        async closeBundle() {
+            if (typeWorker) {
+                typeWorker.terminate();
+                typeWorker = null;
             }
         }
     };
+
+    // 在插件实例上暴露清理缓存的方法
+    (plugin as any).clearCache = () => {
+        apiTypes.clear();
+    };
+
+    return plugin;
 }
 
 // 导出所有类型和工具类

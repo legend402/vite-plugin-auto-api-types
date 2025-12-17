@@ -1,5 +1,5 @@
 // 测试模块化类型文件生成功能
-import { TypeGenerator } from './src/generators/TypeGenerator';
+import { TypeGenerator } from '../src/generators/TypeGenerator';
 import fs from 'fs';
 import path from 'path';
 

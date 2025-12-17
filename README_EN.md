@@ -12,6 +12,11 @@ A Vite plugin that automatically intercepts frontend requests, parses response d
 - 🌍 **Global Type Declarations**: Generates `.d.ts` global type files that can be used without manual import for type hints
 - ⚡ **Seamless Development**: Type updates do not trigger page refresh and do not interrupt the development process
 - 🎯 **Flexible Configuration**: Supports excluding specified URLs, customizing output directory/file name, debounce delay, etc.
+- 📦 **Modular Types**: Supports generating API types from different modules into independent files
+- 📂 **Subdirectory Support**: Can centrally store modular type files in a specified subdirectory
+- 🎨 **Custom Type Naming**: Supports user-defined type naming rules to generate type names that match project specifications
+- 🧠 **LRU Cache Optimization**: Built-in LRU cache mechanism to automatically limit memory usage and avoid memory leaks
+- 🗑️ **Manual Cache API**: Provides clearCache() plugin method to support manual cache cleaning for flexible memory control
 - 🛡️ **Stable and Reliable**: Complete error handling, and interception logic does not affect the execution of original requests
 
 ## 📦 Installation
@@ -41,7 +46,23 @@ export default defineConfig({
       outputDir: 'src/types',          // Type file output directory, default: types
       excludeUrls: [/^\/assets/, /\.(svg|png|jpg)$/], // Exclude URLs that do not need to be intercepted
       typeFileName: 'auto-api-types.d.ts', // Generated type file name, default: api-types.d.ts
-      debounceDelay: 1000 // Debounce delay (ms), default: 1000
+      debounceDelay: 1000, // Debounce delay (ms), default: 1000
+      moduleMap: {
+        // Modular type configuration, generate types for specific URLs into independent files
+        '/api/user': 'user',       // Generate types for requests starting with /api/user into user.d.ts
+        '/api/product': 'product', // Generate types for requests starting with /api/product into product.d.ts
+        '/api/order': 'order'      // Generate types for requests starting with /api/order into order.d.ts
+      },
+      moduleDir: 'modules', // Subdirectory for modular type files, default: no subdirectory created
+      typeNameGenerator: (url) => {
+        // Custom type naming rule
+        const path = url.replace(/^https?:\/\/[^\/]+/, '')
+          .replace(/^\/api\//, '') // Remove /api prefix
+          .replace(/[^a-zA-Z0-9]/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_|_$/g, '');
+        return path ? `Api_${path}` : 'Api_Unknown';
+      }
     })
   ]
 });
@@ -96,11 +117,15 @@ async function getUserList() {
 |--------------------|------|---------------|-------------|
 | `outputDir` | `string` | `types` | Type file output directory (relative to the project root directory) |
 | `excludeUrls` | `RegExp[]` | `[]` | Regular expression list of URLs to exclude (e.g., static resources, images, etc.) |
-| `typeFileName` | `string` | `api-types.d.ts` | Generated type declaration file name |
+| `typeFileName` | `string` | `api-types.d.ts` | Generated type declaration file name (default type file) |
 | `debounceDelay` | `number` | `1000` | Debounce delay (ms), to avoid frequent file writing caused by multiple requests in a short time |
+| `moduleMap` | `Record<string, string>` | `{}` | URL prefix mapping table, generate types for matching prefix requests into specified file names (without extension) |
+| `moduleDir` | `string` | `undefined` | Subdirectory name for storing modular type files, after setting, modular type files will be generated to `${outputDir}/${moduleDir}` directory |
+| `typeNameGenerator` | `(url: string) => string` | Default rule | Custom type naming rule function, generates type name based on URL |
+| `cacheSize` | `number` | `100` | LRU cache size, limits the maximum number of API type records to avoid excessive memory usage |
 
 ## 🎨 Type Generation Rules
-1. **Type Naming**: Generated based on the request URL, with the following rules:
+1. **Type Naming**: Generated based on the request URL, with the default rules:
     - Remove the domain part: `https://api.example.com/user` → `user`
     - Replace special characters with underscores: `/api/user/list?page=1` → `api_user_list`
     - Final generation: `Api_${processed URL}` → `Api_api_user_list`
@@ -115,6 +140,15 @@ async function getUserList() {
    | object | Recursively generate interface types |
    | array | Generate array types (e.g., `Type[]`) |
 3. **Complex Types**: Automatically recursively parse nested object/array structures and generate complete type declarations.
+4. **Modular Type Generation**:
+   - Types for requests not matching `moduleMap` are generated into the default file (e.g., `api-types.d.ts`)
+   - Types for requests matching `moduleMap` are generated into specified files (e.g., `user.d.ts`)
+   - After setting `moduleDir`, modular type files are generated into the specified subdirectory
+   - Types from the same module are merged into the same file
+5. **Custom Type Naming**:
+   - Custom type naming rules can be configured through the `typeNameGenerator` option
+   - This function receives the URL parameter and returns the generated type name
+   - Supports fully custom type naming to meet the naming requirements of different projects
 
 ## 🚫 Excluding URL Examples
 ```typescript
