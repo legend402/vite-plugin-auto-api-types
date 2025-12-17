@@ -5,6 +5,12 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 项目版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [1.1.1] - 2025-12-17
+### Added
+- 新增自定义响应路径提取函数功能
+- 允许用户在配置中指定一个函数，用于从API响应中提取需要生成类型的部分
+- 完善文档，添加自定义响应路径提取函数的使用说明
+
 ## [1.1.0] - 2025-12-17
 ### Added
 - 实现局部类型生成功能

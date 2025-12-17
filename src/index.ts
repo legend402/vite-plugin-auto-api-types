@@ -35,7 +35,12 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
         const typeName = typeNameGenerator(url);
         
         // 根据路径提取数据
-        const extractedData = extractValueByPath(data, responsePath);
+        let extractedData = data;
+        if (typeof responsePath === 'function') {
+            extractedData = responsePath(data) || data;
+        } else if (responsePath) {
+            extractedData = extractValueByPath(data, responsePath);
+        }
 
         // 使用Worker异步生成类型字符串
         const typeStr = await typeWorker.generateType(typeName, extractedData);

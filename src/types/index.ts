@@ -52,8 +52,9 @@ export interface AutoApiTypesPluginOptions {
     /**
      * 从API响应中提取类型的路径
      * 格式：'result.records' 表示从response.result.records提取类型
+     * 也可以是一个函数，接收API响应数据作为参数，返回提取的类型
      */
-    responsePath?: string;
+    responsePath?: string | ((data: any) => any);
 }
 
 // 导出类型
