@@ -11,6 +11,13 @@
 - 添加 CHANGELOG.md 文件以跟踪版本变更
 - 更新 package.json 中的 test 脚本，使用 npx tsx 运行测试文件
 
+## [1.0.6] - 2025-12-17
+
+### 新增
+- 实现模块化类型文件生成功能
+- 在AutoApiTypesPluginOptions中添加moduleMap配置项
+- 支持根据URL前缀将API类型分组到不同的模块文件中
+
 ## [1.0.4] - 2025-12-17
 
 ### 变更

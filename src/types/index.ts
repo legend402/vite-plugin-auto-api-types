@@ -27,6 +27,12 @@ export interface AutoApiTypesPluginOptions {
      * @default 1000
      */
     debounceDelay?: number;
+    /**
+     * 模块化类型文件映射配置
+     * 格式：{ '/api/path': 'moduleName' }
+     * 符合映射规则的API会生成到对应的模块文件中，其他API会生成到typeFileName中
+     */
+    moduleMap?: Record<string, string>;
 }
 
 // 导出类型

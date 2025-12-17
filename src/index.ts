@@ -15,12 +15,25 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
         outputDir = 'types',
         excludeUrls = [],
         typeFileName = 'api-types.d.ts',
-        debounceDelay = 1000
+        debounceDelay = 1000,
+        moduleMap = {}
     } = options;
 
     // 存储API类型记录
     const apiTypes: ApiTypeRecord = {};
     let outputPath = '';
+
+    // 工具函数：根据URL获取对应的模块名称
+    const getModuleName = (url: string): string => {
+        // 遍历moduleMap，找到匹配的URL前缀
+        for (const [pathPattern, moduleName] of Object.entries(moduleMap)) {
+            if (url.startsWith(pathPattern)) {
+                return moduleName;
+            }
+        }
+        // 默认返回主文件
+        return typeFileName.replace('.d.ts', '');
+    };
 
     // 工具函数：更新API类型
     const updateApiType = debounce((url: string, data: any) => {
@@ -46,17 +59,40 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
     // 工具函数：写入类型文件
     const writeTypesFile = () => {
         try {
-            const typeEntries = Object.values(apiTypes).map(item => item.type);
-            const content = [
-                `// 自动生成的API类型声明 - ${new Date().toLocaleString()}`,
-                `/* eslint-disable */`,
-                `declare global {`,
-                ...typeEntries.map(t => t.replace(/export /g, '')), // 转为全局类型
-                `}`,
-                `export {};`
-            ].join('\n\n');
-
-            fs.writeFileSync(outputPath, content, 'utf-8');
+            // 按模块分组类型
+            const moduleTypes: Record<string, string[]> = {};
+            
+            // 遍历所有API类型
+            for (const [url, { type }] of Object.entries(apiTypes)) {
+                const moduleName = getModuleName(url);
+                if (!moduleTypes[moduleName]) {
+                    moduleTypes[moduleName] = [];
+                }
+                moduleTypes[moduleName].push(type);
+            }
+            
+            // 为每个模块生成类型文件
+            for (const [moduleName, typeEntries] of Object.entries(moduleTypes)) {
+                // 确定文件名
+                const fileName = moduleName === typeFileName.replace('.d.ts', '') ? 
+                    typeFileName : `${moduleName}.d.ts`;
+                
+                // 确定输出路径
+                const filePath = path.resolve(outputDir, fileName);
+                
+                // 生成文件内容
+                const content = [
+                    `// 自动生成的API类型声明 - ${new Date().toLocaleString()}`,
+                    `/* eslint-disable */`,
+                    `declare global {`,
+                    ...typeEntries.map(t => t.replace(/export /g, '')), // 转为全局类型
+                    `}`,
+                    `export {};`
+                ].join('\n\n');
+                
+                // 写入文件
+                fs.writeFileSync(filePath, content, 'utf-8');
+            }
         } catch (err) {
             console.error('写入API类型文件失败:', err);
         }
@@ -69,10 +105,13 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
         // 开发服务器配置
         configureServer(server) {
             const root = server.config.root || process.cwd();
-            outputPath = path.resolve(root, outputDir, typeFileName);
-
+            
             // 确保输出目录存在
-            fs.mkdirSync(path.dirname(outputPath), { recursive: true, mode: 0o755 });
+            const outputDirPath = path.resolve(root, outputDir);
+            fs.mkdirSync(outputDirPath, { recursive: true, mode: 0o755 });
+            
+            // 设置主输出路径
+            outputPath = path.resolve(outputDirPath, typeFileName);
 
             // 初始化类型文件（不存在时创建）
             fsPromises.access(outputPath).catch(async () => {
