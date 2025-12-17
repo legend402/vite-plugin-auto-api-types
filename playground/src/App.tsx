@@ -6,8 +6,8 @@ import { getUsers } from './api/userApi'
 import { getProducts, searchProducts } from './api/productApi'
 
 function App() {
-  const [users, setUsers] = useState<Api_users>([]);
-  const [products, setProducts] = useState<Api_posts>([]);
+  const [users, setUsers] = useState<Users>([]);
+  const [products, setProducts] = useState<Posts>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 

@@ -8,6 +8,7 @@
 export const generateSafeTypeName = (url: string): string => {
     // 生成唯一的类型名称（避免特殊字符）
     const safeUrl = url.replace(/^https?:\/\/[^\/]+/, '') // 移除域名
+        .replace(/^\/api\/?/, '') // 移除/api前缀
         .replace(/[^a-zA-Z0-9]/g, '_')
         .replace(/_+/g, '_')
         .replace(/^_|_$/g, '');

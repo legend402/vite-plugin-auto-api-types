@@ -16,7 +16,13 @@
     "dev": "tsup --watch",
     "build": "tsup",
     "preview": "vite preview",
-    "test": "npx tsx ./test/test-type-generation.ts & npx tsx ./test/test-module-generation.ts & npx tsx ./test/test-custom-type-naming.ts & npx tsx ./test/test-lru-cache.ts"
+    "test": "vitest run"
+  },
+  "vitest": {
+    "include": [
+      "**/test/*.ts"
+    ],
+    "globals": true
   },
   "keywords": [
     "vite",
@@ -31,7 +37,8 @@
   "devDependencies": {
     "@types/node": "^25.0.2",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   },
   "files": [
     "dist"
