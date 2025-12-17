@@ -5,29 +5,35 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 项目版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
-## [1.0.4] - 2024-10-27
+## [1.0.5] - 2025-12-17
+
+### 新增
+- 添加 CHANGELOG.md 文件以跟踪版本变更
+- 更新 package.json 中的 test 脚本，使用 npx tsx 运行测试文件
+
+## [1.0.4] - 2025-12-17
 
 ### 变更
 - 重构代码结构，将代码拆分到 src/types、src/generators、src/utils 和 src/client 目录
 - 优化项目文件组织，使代码结构更清晰、职责更明确
 - 更新 README.md 和 README_EN.md 文档，添加语言切换功能
 
-## [1.0.3] - 2024-10-27
+## [1.0.3] - 2025-12-17
 
 ### 修复
 - 修复类型生成时的格式化问题
 
-## [1.0.2] - 2024-10-27
+## [1.0.2] - 2025-12-17
 
 ### 新增
 - 支持 CommonJS 模块格式
 
-## [1.0.1] - 2024-10-27
+## [1.0.1] - 2025-12-16
 
 ### 修复
 - 修复一些小的 bug
 
-## [1.0.0] - 2024-10-27
+## [1.0.0] - 2025-12-16
 
 ### 新增
 - 发布 vite-plugin-auto-api-types 插件
