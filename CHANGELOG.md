@@ -5,6 +5,10 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 项目版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [1.1.2] - 2025-12-17
+### Fixed
+- 修复发布问题，重新发布1.1.1版本内容
+
 ## [1.1.1] - 2025-12-17
 ### Added
 - 新增自定义响应路径提取函数功能
