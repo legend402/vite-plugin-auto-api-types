@@ -16,7 +16,8 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
         excludeUrls = [],
         typeFileName = 'api-types.d.ts',
         debounceDelay = 1000,
-        moduleMap = {}
+        moduleMap = {},
+        moduleDir = ''
     } = options;
 
     // 存储API类型记录
@@ -78,7 +79,23 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
                     typeFileName : `${moduleName}.d.ts`;
                 
                 // 确定输出路径
-                const filePath = path.resolve(outputDir, fileName);
+                let filePath;
+                if (moduleName === typeFileName.replace('.d.ts', '')) {
+                    // 默认文件直接放在outputDir中
+                    filePath = path.resolve(outputDir, fileName);
+                } else {
+                    // 模块化文件根据moduleDir配置决定路径
+                    if (moduleDir) {
+                        // 如果设置了moduleDir，则放在子目录中
+                        const moduleDirPath = path.resolve(outputDir, moduleDir);
+                        // 确保模块目录存在
+                        fs.mkdirSync(moduleDirPath, { recursive: true, mode: 0o755 });
+                        filePath = path.resolve(moduleDirPath, fileName);
+                    } else {
+                        // 否则和默认文件放在同一目录
+                        filePath = path.resolve(outputDir, fileName);
+                    }
+                }
                 
                 // 生成文件内容
                 const content = [

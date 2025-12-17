@@ -33,6 +33,11 @@ export interface AutoApiTypesPluginOptions {
      * 符合映射规则的API会生成到对应的模块文件中，其他API会生成到typeFileName中
      */
     moduleMap?: Record<string, string>;
+    /**
+     * 模块化类型文件存放的子目录名称
+     * 如果设置，模块化类型文件会生成到 ${outputDir}/${moduleDir} 目录下
+     */
+    moduleDir?: string;
 }
 
 // 导出类型

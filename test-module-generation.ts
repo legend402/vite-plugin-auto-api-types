@@ -62,8 +62,8 @@ const getModuleName = (url: string, typeFileName: string): string => {
   return typeFileName.replace('.d.ts', '');
 };
 
-// 模拟writeTypesFile函数
-const writeTypesFile = (apiTypes: any, outputDir: string, typeFileName: string) => {
+// 模拟writeTypesFile函数（支持moduleDir）
+const writeTypesFile = (apiTypes: any, outputDir: string, typeFileName: string, moduleDir?: string) => {
   try {
     // 按模块分组类型
     const moduleTypes: Record<string, string[]> = {};
@@ -85,7 +85,23 @@ const writeTypesFile = (apiTypes: any, outputDir: string, typeFileName: string) 
       const fileName = moduleName === typeFileName.replace('.d.ts', '') ? 
           typeFileName : `${moduleName}.d.ts`;
       
-      console.log(`生成文件: ${fileName}`);
+      // 确定输出路径
+      let filePath;
+      if (moduleName === typeFileName.replace('.d.ts', '')) {
+        // 默认文件直接放在outputDir中
+        filePath = path.resolve(outputDir, fileName);
+      } else {
+        // 模块化文件根据moduleDir配置决定路径
+        if (moduleDir) {
+          // 如果设置了moduleDir，则放在子目录中
+          filePath = path.resolve(outputDir, moduleDir, fileName);
+        } else {
+          // 否则和默认文件放在同一目录
+          filePath = path.resolve(outputDir, fileName);
+        }
+      }
+      
+      console.log(`生成文件: ${filePath}`);
       console.log('包含的类型:', typeEntries.map(t => t.match(/export type (\w+)/)?.[1]).filter(Boolean));
     }
     
@@ -96,5 +112,9 @@ const writeTypesFile = (apiTypes: any, outputDir: string, typeFileName: string) 
 };
 
 // 执行测试
-console.log('=== 模块化类型文件生成测试 ===\n');
+console.log('=== 模块化类型文件生成测试（无moduleDir） ===\n');
 writeTypesFile(mockApiTypes, 'types', 'api-types.d.ts');
+
+// 执行带moduleDir的测试
+console.log('\n=== 模块化类型文件生成测试（带moduleDir="modules"） ===\n');
+writeTypesFile(mockApiTypes, 'types', 'api-types.d.ts', 'modules');
