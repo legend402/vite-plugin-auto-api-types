@@ -124,7 +124,7 @@ async function getUserList() {
 | `moduleDir` | `string` | `undefined` | Subdirectory name for storing modular type files, after setting, modular type files will be generated to `${outputDir}/${moduleDir}` directory |
 | `typeNameGenerator` | `(url: string) => string` | Default rule | Custom type naming rule function, generates type name based on URL |
 | `cacheSize` | `number` | `100` | LRU cache size, limits the maximum number of API type records to avoid excessive memory usage |
-| `responsePath` | `string | ((data: any) => any)` | `undefined` | Specifies the path to extract types from API responses (e.g., 'result.records'), generates type definitions only for the specified path or custom response path extraction function |
+| `responsePath` | `string \| ((data: any) => any)` | `undefined` | Specifies the path to extract types from API responses (e.g., 'result.records'), generates type definitions only for the specified path or custom response path extraction function |
 
 ## 🎨 Type Generation Rules
 1. **Type Naming**: Generated based on the request URL, with the default rules:
