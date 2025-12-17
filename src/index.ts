@@ -5,7 +5,7 @@ import fsPromises from 'fs/promises';
 import path from 'path';
 import { TypeGenerator } from './generators/TypeGenerator';
 import { getClientScript } from './client';
-import { generateSafeTypeName } from './utils';
+import { generateSafeTypeName, debounce } from './utils';
 import type { AutoApiTypesPluginOptions, ApiTypeRecord } from './types';
 
 // 插件主函数
@@ -23,7 +23,7 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
     let outputPath = '';
 
     // 工具函数：更新API类型
-    const updateApiType = (url: string, data: any) => {
+    const updateApiType = debounce((url: string, data: any) => {
         // 生成唯一的类型名称
         const typeName = generateSafeTypeName(url);
 
@@ -32,9 +32,6 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
 
         // 防抖：1秒内不重复更新
         const now = Date.now();
-        if (apiTypes[url]?.lastUpdate && now - apiTypes[url].lastUpdate < debounceDelay) {
-            return;
-        }
 
         // 更新类型记录
         apiTypes[url] = {
@@ -44,7 +41,7 @@ export default function autoApiTypesPlugin(options: AutoApiTypesPluginOptions = 
 
         // 写入类型文件
         writeTypesFile();
-    };
+    }, debounceDelay);
 
     // 工具函数：写入类型文件
     const writeTypesFile = () => {
