@@ -5,6 +5,11 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 项目版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [1.1.3] - 2025-12-18
+### Fixed
+- 修复树形结构类型生成问题，确保MenuTreeNode等节点类型能正确生成到文件中
+- 优化getObjectProperties方法，使其在处理数组类型属性时能正确检测并应用树形结构生成逻辑
+
 ## [1.1.2] - 2025-12-17
 ### Fixed
 - 修复发布问题，重新发布1.1.1版本内容
